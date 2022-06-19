@@ -1,0 +1,91 @@
+title: "MoodCat (Sentence Mood Classifier for English)"
+description: >
+  "This repository shows how to training a sentence mood classifier using spaCy's
+  SpanCategorizer component and the Georgetown University Multilayer Corpus. In
+  addition, the classifier includes a custom span suggester, which returns sentences
+  for classification."
+
+# Variables can be referenced across the project.yml using ${vars.var_name}
+vars:
+  name: "moodcat"
+  lang: "en"
+  gpu_id: -1
+  version: "0.0.1"
+  config: "spancat.cfg"
+  suggester: "scripts/sent_suggester.py"
+
+# These are the directories that the project needs. The project CLI will make
+# sure that they always exist.
+directories: ["assets", "corpus", "configs", "training", "scripts", "packages"]
+
+# Assets that should be downloaded or available in the directory. We're shipping
+# them with the project, so they won't have to be downloaded.
+assets:
+  - dest: "assets/gum"
+    git:
+      repo: "https://github.com/amir-zeldes/gum"
+      branch: "master"
+      path: "dep"
+    description: "The Georgetown University Multilayer (GUM) Corpus"
+
+# Workflows are sequences of commands (see below) executed in order. You can
+# run them via "spacy project run [workflow]". If a commands's inputs/outputs
+# haven't changed, it won't be re-run.
+workflows:
+  all:
+    - convert
+    - train
+    - evaluate
+    - package
+
+# Project commands, specified in a style similar to CI config files (e.g. Azure
+# pipelines). The name is the command name that lets you trigger the command
+# via "spacy project run [command] [path]". The help message is optional and
+# shown when executing "spacy project run [optional command] [path] --help".
+commands:
+  - name: "convert"
+    help: "Convert the CoNLL-U data to spaCy's binary format"
+    script:
+      - "python scripts/create_corpus.py assets/gum"
+    deps:
+      - "scripts/create_corpus.py"
+    outputs:
+      - "corpus/train.spacy"
+      - "corpus/dev.spacy"
+
+  - name: "debug"
+    help: "Debug the data for insights on the corpus"
+    script:
+      - "python -m spacy debug data configs/${vars.config} --code scripts/sent_suggester.py"
+    deps:
+      - "configs/${vars.config}"
+
+  - name: "train"
+    help: "Train the model for sentence mood classification"
+    script:
+      - "python -m spacy train configs/${vars.config} --output training/ --paths.train corpus/train.spacy --paths.dev corpus/dev.spacy --nlp.lang ${vars.lang} --gpu-id ${vars.gpu_id} --code ${vars.suggester}"
+    deps:
+      - "configs/${vars.config}"
+      - "corpus/train.spacy"
+      - "corpus/dev.spacy"
+    outputs:
+      - "training/model-best"
+
+  - name: "evaluate"
+    help: "Evaluate the model and export metrics"
+    script:
+      - "python -m spacy evaluate training/model-best corpus/dev.spacy --output training/metrics.json --code ${vars.suggester}"
+    deps:
+      - "corpus/dev.spacy"
+      - "training/model-best"
+    outputs:
+      - "training/metrics.json"
+
+  - name: "package"
+    help: "Package the trained model as a pip package"
+    script:
+      - "python -m spacy package training/model-best packages --name ${vars.name} --version ${vars.version} --force --code ${vars.suggester} --create-meta"
+    deps:
+      - "training/model-best"
+    outputs_no_cache:
+      - "packages/${vars.lang}_${vars.name}-${vars.version}/dist/${vars.lang}_${vars.name}-${vars.version}.tar.gz"

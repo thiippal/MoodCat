@@ -1,0 +1,3 @@
+[spacy_models]
+en_moodcat = en_moodcat
+

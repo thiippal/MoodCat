@@ -1,0 +1,18 @@
+{
+  "labels":[
+    "frag",
+    "decl",
+    "sub",
+    "multiple",
+    "q",
+    "imp",
+    "wh",
+    "other",
+    "intj",
+    "inf",
+    "ger"
+  ],
+  "spans_key":"mood",
+  "threshold":0.5,
+  "max_positive":null
+}
