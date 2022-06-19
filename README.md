@@ -1,6 +1,6 @@
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS START (do not remove) -->
 
-# MoodCat 😼 (Sentence Mood Classifier for English)
+# MoodCat😼 (Sentence Mood Classifier for English)
 
 This repository shows how to train a sentence [mood](https://en.wikipedia.org/wiki/Grammatical_mood) classifier using spaCy's new [SpanCategorizer](https://spacy.io/api/spancategorizer) component and the [Georgetown University Multilayer (GUM) Corpus](https://github.com/amir-zeldes/gum). The classifier uses a [custom span suggester](scripts/sent_suggester.py), which returns sentences for classification.
 
