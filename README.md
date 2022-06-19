@@ -6,6 +6,8 @@ This repository shows how to train a sentence [mood](https://en.wikipedia.org/wi
 
 Please note that this repository is only for demonstration. The GUM corpus is too small for training a classifier from scratch and some labels are very rare. The classifier does a decent job with declaratives and interrogatives, but struggles with imperatives and rarer moods.
 
+For information on classifier performance, see the file [`training/metrics.json`](training/metrics.json).
+
 ## 📋 project.yml
 
 The [`project.yml`](project.yml) defines the data assets required by the
